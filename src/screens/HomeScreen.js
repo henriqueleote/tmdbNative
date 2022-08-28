@@ -6,7 +6,6 @@ import SearchBar from "react-native-dynamic-search-bar";
 
 
 
-
 const defaultAPI = "https://api.themoviedb.org/3/discover/movie?api_key=8246306bee45758b9cae4e0b6a240224";
 const defaultImage = "https://image.tmdb.org/t/p/w185";
 
@@ -15,40 +14,66 @@ const HomeScreen = () => {
 
     const navigation = useNavigation();
 
-    const [movies, setMovies] = useState([]);
+    const [masterDataSource, setMasterDataSource] = useState([]);
+    const [filteredDataSource, setFilteredDataSource] = useState([]);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         fetch(defaultAPI)
         .then((res) => res.json())
         .then(data => {
-            setMovies(data.results);
+            setFilteredDataSource(data.results);
+            setMasterDataSource(data.results);
         })
     }, [])
 
-        return(
+    const searchFilterFunction = (text) => {
+        if (text) {
+          const newData = masterDataSource.filter(function (item) {
+            const itemData = item.title
+              ? item.title.toUpperCase()
+              : ''.toUpperCase();
+            const textData = text.toUpperCase();
+            return itemData.indexOf(textData) > -1;
+          });
+          setFilteredDataSource(newData);
+          setSearch(text);
+        } else {
+          setFilteredDataSource(masterDataSource);
+          setSearch(text);
+        }
+      };    
+
+      const ItemView = ({ item }) => {
+        return (
+            <View style={styles.card}>       
+            <TouchableOpacity onPress={() => navigation.navigate('MovieDetail', { movieData: item })}>
+            <Image
+               style={styles.imageThumbnail}   
+               source={{ uri: defaultImage + item.poster_path }}
+               /> 
+            </TouchableOpacity>
+           </View>
+        );
+      };
+    
+       return(
         <View style={styles.main} >
             <Text style={styles.title}>Discover</Text>
             <SearchBar
                 darkMode={true}
-                placeholder="Search here"
                 onPress={() => alert("onPress")}
-                onChangeText={(text) => console.log(text)}
+                onChangeText={(text) => searchFilterFunction(text)}
+                onClearPress={(text) => searchFilterFunction('')}
+                placeholder="Type Here..."
+                value={search}
             />
             <View style={styles.grid}>
             <FlatList
-                    data={movies}
-                    renderItem={({ item }) => (
-                    <View style={styles.card}>       
-                     <TouchableOpacity onPress={() => navigation.navigate('MovieDetail', { movieData: item })}>
-                     <Image
-                        style={styles.imageThumbnail}   
-                        source={{ uri: defaultImage + item.poster_path }}
-                        /> 
-                     </TouchableOpacity>
-                    </View>
-                    )}
+                    data={filteredDataSource}
                     numColumns={3}
                     keyExtractor={({ id, index }) => id.toString()}
+                    renderItem={ItemView}
                 />
             </View>
         </View>
