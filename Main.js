@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './src/screens/HomeScreen';
 import DiscoverScreen from './src/screens/DiscoverScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import MovieDetail from './src/screens/MovieDetail';
 
 
 
@@ -18,6 +19,8 @@ const MainActivity = () => {
         <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} options={{ headerShown: false}}/>
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ headerShown: false}}/>
+        <Stack.Screen name="MovieDetail" component={MovieDetail} options={{ headerShown: false}}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );
