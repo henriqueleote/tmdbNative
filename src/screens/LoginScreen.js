@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions,Image } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
+import { SocialIcon } from 'react-native-elements'
 
 
 
@@ -94,6 +95,7 @@ const LoginScreen = () => {
               <Text style={styles.forgot}>Forgot Password?</Text>
             </TouchableOpacity>
             <View style={styles.dividor}/>
+            <Text style={styles.signup}>Don't have an account?</Text>
             <View style={styles.social}>
                 <TouchableOpacity style={styles.clickable} onPress={googleSignIn}>
                     <Image style={styles.email} source={require('../../assets/icons/email.png')}/>
@@ -182,6 +184,12 @@ const styles = StyleSheet.create({
         opacity: 0.3,
         marginLeft: 'auto',
         marginRight: 'auto',
+        marginTop: 30 
+      },
+      signup:{
+        fontSize: 15,
+        color:"#ed3a39",
+        textAlign:'center',
         marginTop: 30 
       },
       social: {
