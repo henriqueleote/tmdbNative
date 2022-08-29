@@ -1,82 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import { Text, Dimensions, View, Image, FlatList, StyleSheet } from 'react-native';
+import { Text, Dimensions, View, Image, FlatList, StyleSheet, RefreshControl, ScrollView, Empty } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
-import SearchBar from "react-native-dynamic-search-bar";
+import firestore from '@react-native-firebase/firestore';
 
-
-
-const defaultAPI = "https://api.themoviedb.org/3/discover/movie?api_key=8246306bee45758b9cae4e0b6a240224";
+const specificMovie = "https://api.themoviedb.org/3/movie/"
+const keyAPI = "?api_key=8246306bee45758b9cae4e0b6a240224";
 const defaultImage = "https://image.tmdb.org/t/p/w185";
 
 
 const HomeScreen = () => {
 
+    const [masterDataSource, setMasterDataSource] = useState([]);
+
+    const [isFetching, setIsFetching] = useState(false);
+
     const navigation = useNavigation();
 
-    const [masterDataSource, setMasterDataSource] = useState([]);
-    const [filteredDataSource, setFilteredDataSource] = useState([]);
-    const [search, setSearch] = useState('');
+    useEffect( () => {
+      getAll();
+    }, []);
 
-    useEffect(() => {
-        fetch(defaultAPI)
+    async function getAll() {
+      let movies = [];
+      const value = await getUsers();
+      console.log(value);
+      value.map(movie => {
+        fetch(specificMovie + movie + keyAPI)
         .then((res) => res.json())
-        .then(data => {
-            setFilteredDataSource(data.results);
-            setMasterDataSource(data.results);
-        })
-    }, [])
+        .then(data => { movies.push(data);})
+        .then(function(){
+          })
+        .catch(function(error) {
+          console.log(error)
+        });
+      })
+      setMasterDataSource(movies);
+      setIsFetching(false);
+    }
 
-    const searchFilterFunction = (text) => {
-        if (text) {
-          const newData = masterDataSource.filter(function (item) {
-            const itemData = item.title
-              ? item.title.toUpperCase()
-              : ''.toUpperCase();
-            const textData = text.toUpperCase();
-            return itemData.indexOf(textData) > -1;
-          });
-          setFilteredDataSource(newData);
-          setSearch(text);
-        } else {
-          setFilteredDataSource(masterDataSource);
-          setSearch(text);
-        }
-      };    
+    const onRefresh = () => {
+      setIsFetching(true);
+      getAll();
+    };
 
-      const ItemView = ({ item }) => {
-        return (
-            <View style={styles.card}>       
-            <TouchableOpacity onPress={() => navigation.navigate('MovieDetail', { movieData: item })}>
-            <Image
-               style={styles.imageThumbnail}   
-               source={{ uri: defaultImage + item.poster_path }}
-               /> 
-            </TouchableOpacity>
-           </View>
-        );
-      };
+    async function getUsers() {
+      const userRef = firestore().collection('users').doc('kPFLrsuPkLCoY3fjusGX');
+      const doc = await userRef.get();
+      if (doc.exists) {
+        console.log('Document data:', doc.get('movies'));
+        const moviesData = doc.get('movies');
+        return moviesData;
+      } else {
+        console.log('No such document!');
+      }
+    }
     
-       return(
-        <View style={styles.main} >
-            <Text style={styles.title}>Discover</Text>
-            <SearchBar
-                darkMode={true}
-                onPress={() => alert("onPress")}
-                onChangeText={(text) => searchFilterFunction(text)}
-                onClearPress={(text) => searchFilterFunction('')}
-                placeholder="Type Here..."
-                value={search}
-            />
-            <View style={styles.grid}>
-            <FlatList
-                    data={filteredDataSource}
-                    numColumns={3}
-                    keyExtractor={({ id, index }) => id.toString()}
-                    renderItem={ItemView}
-                />
-            </View>
-        </View>
+
+
+    const ItemView = ({ item }) => {
+      return (
+          <View style={styles.card}>       
+          <TouchableOpacity onPress={() => navigation.navigate('MovieDetail', { movieData: item })}>
+          <Image
+             style={styles.imageThumbnail}   
+             source={{ uri: defaultImage + item.poster_path }}
+             /> 
+          </TouchableOpacity>
+         </View>
+      );
+    };
+
+    return(
+      <View style={styles.main} >
+          <Text style={styles.title}>My List</Text>
+        <View style={styles.grid}>
+        <FlatList
+          style={{backgroundColor:'red'}}
+          data={masterDataSource}
+          numColumns={3}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={ItemView}
+          onRefresh={onRefresh}
+          refreshing={isFetching}
+          progressViewOffset={100} />
+          </View>
+      </View>
     );
 
 
@@ -84,37 +93,37 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    main:{
-        height: Dimensions.get("window").height,
-        width: Dimensions.get("window").width,
-        backgroundColor: "#191931",
-    },
-    title:{
-        fontSize: 25,
-        color: "white",
-        textAlign: "center",
-        padding: 15,
-        fontFamily: "Roboto-Bold"
-    },
-    grid:{
-        marginTop:10
-    },
-    card: {
-        flex: 1,
-        flexDirection: 'column',
-        margin: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom:15
-    },
-    imageThumbnail: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: 100,
-      height: 170,
-      borderRadius:12,
-    },
-    
-  });
+  main:{
+      height: Dimensions.get("window").height,
+      width: Dimensions.get("window").width,
+      backgroundColor: "#191931",
+  },
+  title:{
+      fontSize: 25,
+      color: "white",
+      textAlign: "center",
+      padding: 15,
+      fontFamily: "Roboto-Bold"
+  },
+  grid:{
+      marginTop:10
+  },
+  card: {
+      flex: 1,
+      flexDirection: 'column',
+      margin: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom:15
+  },
+  imageThumbnail: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 100,
+    height: 170,
+    borderRadius:12,
+  },
+  
+});
 
 export default HomeScreen;

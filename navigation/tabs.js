@@ -28,7 +28,7 @@ const Tabs = () => {
                 }
             }}
         >
-            <Tab.Screen name='HomeScreen' component={HomeScreen} options={{ headerShown: false/*, tabBarIcon: () => (<Image source={require("../assets/icons/map.png")} style={{ width: 30, height: 30 }} />)*/ }} />
+            <Tab.Screen name='HomeScreen' component={HomeScreen} options={{ headerShown: false, tabBarIcon: () => (<Image source={require('../assets/icons/news.png')} style={{ width: 30, height: 30 }} />) }} />
             <Tab.Screen name='DiscoverScreen' component={DiscoverScreen} options={{ headerShown: false/*, tabBarIcon: () => (<Image source={require("../assets/icons/news.png")} style={{ width: 30, height: 30 }} />)*/ }} />
             <Tab.Screen name='ProfileScreen' component={ProfileScreen} options={{ headerShown: false/*,  tabBarIcon: () => (<Image source={require("../assets/icons/community.png")} style={{width: 30, height: 30}} />)*/ }} />
         </Tab.Navigator>

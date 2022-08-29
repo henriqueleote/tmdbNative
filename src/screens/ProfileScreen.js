@@ -1,15 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, RefreshControl, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, RefreshControl, ScrollView } from 'react-native';
 import { } from 'react-native-gesture-handler';
+import auth from '@react-native-firebase/auth';
+import LoginScreen from './LoginScreen';
 
 const ProfileScreen = () => {
 
+    async function logout() {
+        await auth().signOut()
+          .then(() => {
+            console.log('logged out');
+            return <LoginScreen />;
+          })
+          .catch(error => console.log(error));
+      }
+
     return (
-        <View>
+        <View style={styles.main}>
             <View style={styles.header}>
                 <Text style={styles.pageTitle}>Profile</Text>
             </View>
-            <Text>Profile</Text>
+            <TouchableOpacity style={styles.logout} onPress={() => logout()} >
+            <Text style={{ color: '#ffffff' }}>LOG OUT</Text>
+          </TouchableOpacity>
         </View>
 
     );
@@ -18,6 +31,11 @@ const ProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
+    main:{
+        height: Dimensions.get("window").height,
+        width: Dimensions.get("window").width,
+        backgroundColor: "#191931",
+    },
     header: {
         minHeight: 20,
         flexDirection: 'row',
@@ -29,7 +47,7 @@ const styles = StyleSheet.create({
         marginRight: 'auto',
         marginLeft: 'auto',
         fontSize: 24,
-        color: 'black',        
+        color: 'white',        
     },
 });
 

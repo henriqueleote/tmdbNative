@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "335520103021",
+    "project_id": "tmdbnative",
+    "storage_bucket": "tmdbnative.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335520103021:android:2a98e829ba070d38335d64",
+        "android_client_info": {
+          "package_name": "com.tmdbnative"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "335520103021-736pjg01ge2aodfohf6amrvc5bbnhb21.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tmdbnative",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "335520103021-0qtan5usoc883epj7sek5rv1fmaqilea.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdT9W4x9yHWvm3_jnhxk_ywRuSuTiOU8Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "335520103021-0qtan5usoc883epj7sek5rv1fmaqilea.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -6,7 +6,7 @@ import SearchBar from "react-native-dynamic-search-bar";
 
 
 
-const defaultAPI = "https://api.themoviedb.org/3/discover/movie?api_key=8246306bee45758b9cae4e0b6a240224";
+const discoverAPI = "https://api.themoviedb.org/3/discover/movie?api_key=8246306bee45758b9cae4e0b6a240224";
 const searchAPI = "https://api.themoviedb.org/3/search/movie?api_key=8246306bee45758b9cae4e0b6a240224&query=";
 const defaultImage = "https://image.tmdb.org/t/p/w185";
 
@@ -20,7 +20,7 @@ const DiscoverScreen = () => {
     const [search, setSearch] = useState('');
 
     useEffect(() => {
-        fetch(defaultAPI)
+        fetch(discoverAPI)
         .then((res) => res.json())
         .then(data => {
             setFilteredDataSource(data.results);
@@ -81,7 +81,7 @@ const DiscoverScreen = () => {
                 />
             </View>
         </View>
-    );
+        );
 
 
 
