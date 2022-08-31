@@ -1,10 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, RefreshControl, ScrollView } from 'react-native';
 import { } from 'react-native-gesture-handler';
 import auth from '@react-native-firebase/auth';
 import LoginScreen from './LoginScreen';
+import firestore from '@react-native-firebase/firestore';
+
+const specificMovie = "https://api.themoviedb.org/3/movie/"
+const keyAPI = "?api_key=8246306bee45758b9cae4e0b6a240224";
 
 const ProfileScreen = () => {
+
+    const [minutes, setMinutes] = useState(0);
+
+    useEffect(() => {
+        getMovies().then(data => getStatistics(data).then(result => setMinutes(result)));
+    })
+
+    async function getMovies() {
+        var moviesData = [];
+        const userRef = firestore().collection('users').doc('kPFLrsuPkLCoY3fjusGX');
+        const doc = await userRef.get();
+        if (doc.exists) {
+          moviesData = doc.get('movies');
+        } else {
+          console.log('No such document!');
+        }
+        const data = Promise.all(
+          moviesData.map(async (movie) => await (await fetch(specificMovie + movie + keyAPI)).json())
+        )
+        return data
+      }
+
+      async function getStatistics(data) {
+        var result = 0;
+        data.map(movie => {
+            result += movie.runtime
+        })
+        return result;
+      }
 
     async function logout() {
         await auth().signOut()
@@ -21,8 +54,10 @@ const ProfileScreen = () => {
                 <Text style={styles.pageTitle}>Profile</Text>
             </View>
             <TouchableOpacity style={styles.logout} onPress={() => logout()} >
-            <Text style={{ color: '#ffffff' }}>LOG OUT</Text>
+            <Text style={{ color: '#ffffff', textAlign:'center' }}>LOG OUT</Text>
           </TouchableOpacity>
+          <Text style={{ color: '#ffffff', textAlign:'center' }}>Total {'->'} {minutes} minutes</Text>
+            <Text style={{ color: '#ffffff', textAlign:'center' }}>Total {'->'} {(minutes/60).toFixed(2)} hours</Text>
         </View>
 
     );
