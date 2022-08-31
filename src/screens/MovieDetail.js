@@ -81,14 +81,14 @@ const MovieDetail = ({route}) => {
                 <Image
                     style={styles.castImage}   
                     source={{ uri: defaultImage + item.profile_path }}/> 
-                    <Text style={styles.castName}>{item.name}</Text>
+                    <Text style={styles.castName}>{item.name.substring(0, 8) + '...'}</Text>
            </View>
         );
       };
 
 
     return(
-        <View style={styles.main} >
+        <View style={styles.main} > 
             <View style={styles.cover}>
             <Image style={styles.imageThumbnail} source={{ uri: coverImage + movieData.backdrop_path }}/> 
             </View>
@@ -126,6 +126,9 @@ const MovieDetail = ({route}) => {
                 <Text style={styles.watchButtonText}>ADD TO FAVOURITES</Text>
                 </TouchableOpacity>
             </View>
+            <TouchableOpacity style={styles.backArrowContainer} onPress={() => { navigation.goBack() }}>
+                    <Image style={styles.backArrow} source={require('../../assets/icons/arrow.png')} />
+            </TouchableOpacity>
         </View>
       );
 };
@@ -136,10 +139,18 @@ const styles = StyleSheet.create({
         width: Dimensions.get("window").width,
         backgroundColor: "#191931",
     },
-    backButton:{
-        position: 'absolute',
-        left: 0,
-        top: 10
+    backArrowContainer:{
+      backgroundColor: '#ed3a39',
+      padding: 5,
+      borderRadius: 5,
+      position: 'absolute',
+      left: 15,
+      top: 15
+  },
+    backArrow:{
+        height: 25,
+        width: 25,
+        right:2
     },
     cover:{
         width: Dimensions.get("window").width,
