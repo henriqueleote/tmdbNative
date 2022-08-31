@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Text, Dimensions, View, Image, FlatList, StyleSheet, RefreshControl, ScrollView, Empty } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
@@ -12,50 +12,32 @@ const defaultImage = "https://image.tmdb.org/t/p/w185";
 const HomeScreen = () => {
 
     const [masterDataSource, setMasterDataSource] = useState([]);
-
-    const [isFetching, setIsFetching] = useState(false);
+    const { current: stable } = useRef(["one"]);
 
     const navigation = useNavigation();
 
     useEffect( () => {
-      getAll();
-    }, []);
-
-    async function getAll() {
-      let movies = [];
-      const value = await getUsers();
-      console.log(value);
-      value.map(movie => {
-        fetch(specificMovie + movie + keyAPI)
-        .then((res) => res.json())
-        .then(data => { movies.push(data);})
-        .then(function(){
-          })
-        .catch(function(error) {
-          console.log(error)
-        });
+      getMoviesFromUser()
+      .then(data => {
+        setMasterDataSource(data)
       })
-      setMasterDataSource(movies);
-      setIsFetching(false);
-    }
+    }, [stable]);
 
-    const onRefresh = () => {
-      setIsFetching(true);
-      getAll();
-    };
-
-    async function getUsers() {
+    async function getMoviesFromUser() {
+      var moviesData = [];
       const userRef = firestore().collection('users').doc('kPFLrsuPkLCoY3fjusGX');
       const doc = await userRef.get();
       if (doc.exists) {
-        console.log('Document data:', doc.get('movies'));
-        const moviesData = doc.get('movies');
-        return moviesData;
+        moviesData = doc.get('movies');
       } else {
         console.log('No such document!');
       }
+      const data = Promise.all(
+        moviesData.map(async (movie) => await (await fetch(specificMovie + movie + keyAPI)).json())
+      )
+      return data
     }
-    
+
 
 
     const ItemView = ({ item }) => {
@@ -71,20 +53,35 @@ const HomeScreen = () => {
       );
     };
 
+    const [onRefresh, setOnRefresh] = useState(false);
+
+
+    const refreshControl = () => {
+ 
+      getMoviesFromUser()
+      .then(data => {
+        setMasterDataSource(data)
+      })
+  
+    }
+
+
     return(
       <View style={styles.main} >
           <Text style={styles.title}>My List</Text>
-        <View style={styles.grid}>
-        <FlatList
-          style={{backgroundColor:'red'}}
-          data={masterDataSource}
-          numColumns={3}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={ItemView}
-          onRefresh={onRefresh}
-          refreshing={isFetching}
-          progressViewOffset={100} />
-          </View>
+          <View style={styles.grid}>
+          <FlatList
+            data={masterDataSource}
+            keyExtractor={item => item.id}
+            renderItem={ItemView}
+            numColumns={3}
+            refreshControl={
+              <RefreshControl
+                refreshing={onRefresh}
+                onRefresh={refreshControl}
+              />
+            } />
+            </View>
       </View>
     );
 
@@ -114,7 +111,7 @@ const styles = StyleSheet.create({
       margin: 1,
       justifyContent: "center",
       alignItems: "center",
-      marginBottom:15
+      marginBottom: 15
   },
   imageThumbnail: {
     justifyContent: 'center',

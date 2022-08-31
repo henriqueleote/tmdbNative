@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Text, Dimensions, View, Image, FlatList, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
@@ -18,6 +18,7 @@ const DiscoverScreen = () => {
     const [masterDataSource, setMasterDataSource] = useState([]);
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [search, setSearch] = useState('');
+    const { current: stable } = useRef(["one"]);
 
     useEffect(() => {
         fetch(discoverAPI)
@@ -26,7 +27,7 @@ const DiscoverScreen = () => {
             setFilteredDataSource(data.results);
             setMasterDataSource(data.results);
         })
-    }, [])
+    }, [stable])
 
     const reset = () => {
         let string = "";
@@ -39,7 +40,7 @@ const DiscoverScreen = () => {
             fetch(searchAPI + text)
             .then((res) => res.json())
             .then(data => {
-            setFilteredDataSource(data.results);
+                setFilteredDataSource(data.results);
             })
             setSearch(text);
         } else {
@@ -76,7 +77,7 @@ const DiscoverScreen = () => {
             <FlatList
                     data={filteredDataSource}
                     numColumns={3}
-                    keyExtractor={({ id, index }) => id.toString()}
+                    keyExtractor={item => item.id}
                     renderItem={ItemView}
                 />
             </View>

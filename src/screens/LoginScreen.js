@@ -3,17 +3,19 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Dimensions,Image, 
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
 import RBSheet from "react-native-raw-bottom-sheet";
+import {ProgressBar} from '@react-native-community/progress-bar-android';
 
 
 const LoginScreen = () => {
 
   const refRBSheet = useRef();
+  const { current: stable } = useRef(["one"]);
 
     useEffect(()=> {
         GoogleSignin.configure({
             webClientId: '335520103021-0qtan5usoc883epj7sek5rv1fmaqilea.apps.googleusercontent.com',
         });
-    })
+    }, [stable])
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -411,9 +413,9 @@ const styles = StyleSheet.create({
       },
       bottomRegisterBtn:{
         width:"40%",
+        height:40,
         backgroundColor:"#ed3a39",
         borderRadius:25,
-        height:40,
         alignItems:"center",
         justifyContent:"center",
         marginLeft: 'auto',
