@@ -6,6 +6,7 @@ import { FloatingAction } from "react-native-floating-action";
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import firebase from "@react-native-firebase/app"
+import Stars from 'react-native-stars';
 
 
 const MovieDetail = ({route}) => {
@@ -20,15 +21,28 @@ const MovieDetail = ({route}) => {
 
     const [masterDataSource, setMasterDataSource] = useState([]);
     const [youtubeLink, setYoutubeLink] = useState([]);
+    const [isFavourite, setIsFavourite] = useState(false);
+    const [genres, setGenres] = useState('');
     const { current: stable } = useRef(["one"]);
     const { movieData } = route.params;
     const navigation = useNavigation();
 
 
     useEffect(() => {
+        getFavourite().then(result => setIsFavourite(result));
         getCastData().then(cast => setMasterDataSource(cast));
         getData().then(trailer => setYoutubeLink(trailer[trailer.length-1]));
+        getGenres().then(genres => setGenres(genres));
     }, [stable])
+
+    async function getGenres(){
+      var string = '';
+      let max = movieData.genres.length;
+      for(var i = 0; i < max - 1; i++){
+          string += movieData.genres[i].name + ', ';
+      }
+      return string.substring(0,string.length-2)
+    }
 
     async function getCastData(){
         var cast = [];
@@ -57,22 +71,35 @@ const MovieDetail = ({route}) => {
       return trailer;
   }
 
-  async function checkFavourite(){
-    console.log("oi")
-    var moviesData = [];
+  async function getFavourite(){
+    var isFav = false;
+    var movieData = [];
     const movieRef = firestore().collection('users').doc('kPFLrsuPkLCoY3fjusGX');
     const doc = await movieRef.get();
     if (doc.exists) {
-      moviesData = doc.get('movies');
-      if(moviesData.includes(movieData.id)){
+      movieData = doc.get('movies');
+      if(movieData.includes(movieData.id)){
+        //movieRef.update({'movies': firebase.firestore.FieldValue.arrayRemove(movieData.id)})
+        isFav = true;
+      }
+      else{
+        //movieRef.update({'movies': firebase.firestore.FieldValue.arrayUnion(movieData.id)})
+        isFav = false;
+      }
+    }
+      return isFav;
+  }
+
+  async function setFavourite(){
+      const movieRef = firestore().collection('users').doc('kPFLrsuPkLCoY3fjusGX');
+      if(isFavourite){
         movieRef.update({'movies': firebase.firestore.FieldValue.arrayRemove(movieData.id)})
+        setIsFavourite(false);
       }
       else{
         movieRef.update({'movies': firebase.firestore.FieldValue.arrayUnion(movieData.id)})
+        setIsFavourite(true);
       }
-    } else {
-      console.log('No such document!');
-    }
   }
 
    const ItemView = ({ item }) => {
@@ -86,26 +113,38 @@ const MovieDetail = ({route}) => {
         );
       };
 
-
     return(
         <View style={styles.main} > 
             <View style={styles.cover}>
             <Image style={styles.imageThumbnail} source={{ uri: coverImage + movieData.backdrop_path }}/> 
             </View>
             <View style={styles.page}>
-                <Text style={styles.movieTitle}>{movieData.title}</Text>
+                  <Text style={styles.movieTitle}>{movieData.title} <Text style={styles.movieYear}> ({movieData.release_date.substring(0,4)})</Text></Text>
                 <View style={styles.movieWatchRating}>
                 {youtubeLink === undefined
                 ? <TouchableOpacity disabled={true} style={styles.watchButtonDisabled}>
-                <Text style={styles.watchButtonText}>WATCH NOW</Text>
+                <Text style={styles.watchButtonText}>TRAILER NOT AVALIABLE</Text>
                 </TouchableOpacity>
 
                 : <TouchableOpacity style={styles.watchButton} onPress={ ()=>{ Linking.openURL(youtube + youtubeLink.key)}}>
-                <Text style={styles.watchButtonText}>WATCH NOW</Text>
+                <Text style={styles.watchButtonText}>WATCH TRAILER</Text>
                 </TouchableOpacity>
                 }
+                <View style={styles.rating}>
+                <Stars
+                  display={(movieData.vote_average)/2}
+                  spacing={8}
+                  count={5}
+                  starSize={20}
+                  fullStar = {require('../../assets/icons/star.png')}
+                  emptyStar = {require('../../assets/icons/image.png')}
+                  style/>
                 </View>
-                <Text style={styles.description}>{movieData.overview}</Text>
+                </View>
+                <Text style={styles.overviewTitle}>Overview</Text>
+                <Text style={styles.overview}>{movieData.overview}</Text>
+                <Text style={{marginLeft: 20, color:'white', fontSize:12, marginTop:2}}>Duration - {movieData.runtime} minutes</Text>
+                <Text style={{marginLeft: 20, color:'white', fontSize:12, marginTop:2}}>Genres - {genres}</Text>
                 <View style={styles.cast}>
                     <Text style={styles.castTitle}>Cast</Text>
                 <FlatList
@@ -115,15 +154,13 @@ const MovieDetail = ({route}) => {
                     keyExtractor={item => item.id}
                     renderItem={ItemView} />
                 </View>
-                {/* {
-                movieData.genres.map(genre =>{
-                  return(<Text style={{color:'white'}} key={genre.id}>{genre.name}</Text>)
-                })
-                } */}
-                <Text style={{color:'white'}}>Release Year - {movieData.release_date}</Text>
-                <Text style={{color:'white'}}>Runtime - {movieData.runtime} minutes</Text>
-                <TouchableOpacity style={styles.watchButton} onPress={() => checkFavourite()}>
-                <Text style={styles.watchButtonText}>ADD TO FAVOURITES</Text>
+              
+                <TouchableOpacity style={styles.favButton} onPress={() => setFavourite()}>
+                  {
+                    isFavourite == true
+                    ? <Text style={styles.favButtonText}>REMOVE FROM FAVOURITES</Text>
+                    : <Text style={styles.favButtonText}>ADD TO FAVOURITES</Text>
+                  }
                 </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.backArrowContainer} onPress={() => { navigation.goBack() }}>
@@ -173,14 +210,19 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginLeft: 20
     },
+    movieYear:{
+      fontSize: 15,
+      color:'grey',
+      alignSelf:'flex-end',
+    },
     movieWatchRating:{
-        width:"80%",
-        marginTop: 20,
+        width:"100%",
+        marginTop: 10,
         flexDirection:'row',
-        alignItems:'center'
+        alignItems:'center',
       },
       watchButton:{
-        width:"40%",
+        width:"30%",
         height: 35,
         backgroundColor:"#ed3a39",
         borderRadius:25,
@@ -190,7 +232,7 @@ const styles = StyleSheet.create({
         marginLeft: 20
       },
       watchButtonDisabled:{
-        width:"40%",
+        width:"30%",
         height: 35,
         backgroundColor:"grey",
         borderRadius:25,
@@ -202,11 +244,23 @@ const styles = StyleSheet.create({
       watchButtonText:{
         color: 'white',
         fontSize:12,
+        textAlign:'center'
       },
-      description:{
+      rating:{
+        flex: 0,
+        marginLeft:'auto',
+        marginRight: 20
+      },
+      overviewTitle:{
+        fontSize: 18,
+        marginLeft: 20,
+        marginBottom: 10,
+        color:'white',
+        marginTop: 20
+      },
+      overview:{
         color:'grey',
         fontSize:12,
-        marginTop: 20,
         marginLeft: 20,
         marginRight: 20,
         lineHeight: 18,
@@ -218,7 +272,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
       },
       castTitle:{
-        fontSize: 20,
+        fontSize: 18,
         marginLeft: 20,
         marginBottom: 10,
         color:'white'
@@ -237,7 +291,23 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop:5,
         color:'white'
-      }
+      },
+      favButton:{
+        width:"40%",
+        height: 45,
+        backgroundColor:"#ed3a39",
+        borderRadius:25,
+        alignItems:"center",
+        justifyContent:"center",
+        marginTop: 20,
+        marginRight: 'auto',
+        marginLeft:'auto'
+      },
+      favButtonText:{
+        color: 'white',
+        fontSize:12,
+        textAlign:'center'
+      },
 
 });
 
