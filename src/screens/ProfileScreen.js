@@ -67,8 +67,8 @@ const ProfileScreen = () => {
 
 const styles = StyleSheet.create({
     main:{
-        height: Dimensions.get("window").height,
-        width: Dimensions.get("window").width,
+        height: Dimensions.get("screen").height,
+        width: Dimensions.get("screen").width,
         backgroundColor: "#191931",
     },
     header: {

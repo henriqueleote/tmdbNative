@@ -37,11 +37,14 @@ const MovieDetail = ({route}) => {
 
     async function getGenres(){
       var string = '';
-      let max = movieData.genres.length;
-      for(var i = 0; i < max - 1; i++){
+      if(movieData.genres !== undefined){
+        let max = movieData.genres.length;
+        for(var i = 0; i < max - 1; i++){
           string += movieData.genres[i].name + ', ';
-      }
+        }
       return string.substring(0,string.length-2)
+      }
+      return "N/A";
     }
 
     async function getCastData(){
@@ -119,13 +122,18 @@ const MovieDetail = ({route}) => {
             <Image style={styles.imageThumbnail} source={{ uri: coverImage + movieData.backdrop_path }}/> 
             </View>
             <View style={styles.page}>
-                  <Text style={styles.movieTitle}>{movieData.title} <Text style={styles.movieYear}> ({movieData.release_date.substring(0,4)})</Text></Text>
+                  <Text style={styles.movieTitle}>{movieData.title} 
+                  {
+                    movieData.genres !== undefined
+                    ? <Text style={styles.movieYear}> ({movieData.release_date.substring(0,4)})</Text>
+                    : <Text style={styles.movieYear}></Text>
+                  }
+                  </Text>
                 <View style={styles.movieWatchRating}>
                 {youtubeLink === undefined
                 ? <TouchableOpacity disabled={true} style={styles.watchButtonDisabled}>
                 <Text style={styles.watchButtonText}>TRAILER NOT AVALIABLE</Text>
                 </TouchableOpacity>
-
                 : <TouchableOpacity style={styles.watchButton} onPress={ ()=>{ Linking.openURL(youtube + youtubeLink.key)}}>
                 <Text style={styles.watchButtonText}>WATCH TRAILER</Text>
                 </TouchableOpacity>
@@ -143,7 +151,11 @@ const MovieDetail = ({route}) => {
                 </View>
                 <Text style={styles.overviewTitle}>Overview</Text>
                 <Text style={styles.overview}>{movieData.overview}</Text>
-                <Text style={{marginLeft: 20, color:'white', fontSize:12, marginTop:2}}>Duration - {movieData.runtime} minutes</Text>
+                {
+                    movieData.runtime !== undefined
+                    ? <Text style={{marginLeft: 20, color:'white', fontSize:12, marginTop:2}}>Duration - {movieData.runtime} minutes</Text>
+                    : <Text style={{marginLeft: 20, color:'white', fontSize:12, marginTop:2}}></Text>
+                  }
                 <Text style={{marginLeft: 20, color:'white', fontSize:12, marginTop:2}}>Genres - {genres}</Text>
                 <View style={styles.cast}>
                     <Text style={styles.castTitle}>Cast</Text>
@@ -157,7 +169,7 @@ const MovieDetail = ({route}) => {
               
                 <TouchableOpacity style={styles.favButton} onPress={() => setFavourite()}>
                   {
-                    isFavourite == true
+                    isFavourite === false
                     ? <Text style={styles.favButtonText}>REMOVE FROM FAVOURITES</Text>
                     : <Text style={styles.favButtonText}>ADD TO FAVOURITES</Text>
                   }
@@ -172,8 +184,8 @@ const MovieDetail = ({route}) => {
 
 const styles = StyleSheet.create({
     main:{
-        height: Dimensions.get("window").height,
-        width: Dimensions.get("window").width,
+        height: Dimensions.get("screen").height,
+        width: Dimensions.get("screen").width,
         backgroundColor: "#191931",
     },
     backArrowContainer:{

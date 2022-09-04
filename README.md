@@ -2,9 +2,16 @@
 
 This is a React Native project using the TMDB API
 
+## Autores
+
+- [@henriqueleote](https://www.github.com/henriqueleote)
 
 
-## API Example
 
-```javascript
-const defaultAPI = "https://api.themoviedb.org/3/discover/movie?api_key=8246306bee45758b9cae4e0b6a240224";
+## TODO
+**Fix add/remove favourites**
+
+**Add watched/now watching with progress**
+
+**Add viewed to main page**
+

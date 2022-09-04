@@ -17,10 +17,13 @@ const HomeScreen = () => {
     const navigation = useNavigation();
 
     useEffect( () => {
-      getMoviesFromUser()
+      const focusHandler = navigation.addListener('focus', () => {
+        getMoviesFromUser()
       .then(data => {
         setMasterDataSource(data)
       })
+    });
+    return focusHandler;
     }, [stable]);
 
     async function getMoviesFromUser() {
@@ -42,12 +45,16 @@ const HomeScreen = () => {
 
     const ItemView = ({ item }) => {
       return (
-          <View style={styles.card}>       
+          <View style={styles.card}>    
           <TouchableOpacity onPress={() => navigation.navigate('MovieDetail', { movieData: item })}>
           <Image
              style={styles.imageThumbnail}   
              source={{ uri: defaultImage + item.poster_path }}
              /> 
+             <View style={styles.ratingContainer}>
+              <Image style={styles.ratingImage}source={require('../../assets/icons/star.png')}/>
+              <Text style={styles.ratingText}>{item.vote_average.toFixed(1)}</Text>
+              </View>  
           </TouchableOpacity>
          </View>
       );
@@ -71,10 +78,11 @@ const HomeScreen = () => {
           <Text style={styles.title}>My List</Text>
           <View style={styles.grid}>
           <FlatList
+            style={{marginTop: 15}}
             data={masterDataSource}
+            numColumns={3}
             keyExtractor={item => item.id}
             renderItem={ItemView}
-            numColumns={3}
             refreshControl={
               <RefreshControl
                 refreshing={onRefresh}
@@ -99,27 +107,43 @@ const styles = StyleSheet.create({
       fontSize: 25,
       color: "white",
       textAlign: "center",
-      padding: 15,
-      fontFamily: "Roboto-Bold"
+      marginTop: 15,
   },
   grid:{
-      marginTop:10
+      height: Dimensions.get("screen").height-250,
+      marginLeft: 20,
+      marginRight: 20,
   },
   card: {
-      flex: 1,
-      flexDirection: 'column',
-      margin: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      marginBottom: 15
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginBottom: 15
   },
+
   imageThumbnail: {
-    justifyContent: 'center',
-    alignItems: 'center',
     width: 100,
     height: 170,
     borderRadius:12,
   },
+  ratingContainer:{
+    position:'absolute',
+    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    padding:3,
+    right:5,
+    top:5, 
+    flexDirection:'row', 
+    alignItems:'center',
+    borderRadius: 5
+  },
+  ratingImage:{
+    width:10,
+    height:10
+  },
+  ratingText:{
+    fontSize:10,
+    color:'white',
+    marginLeft: 3
+  }
   
 });
 
