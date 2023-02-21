@@ -2,7 +2,7 @@
 
 This is a React Native project using the TMDB API
 
-## Autores
+## Autors
 
 - [@henriqueleote](https://www.github.com/henriqueleote)
 
